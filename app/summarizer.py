@@ -20,6 +20,8 @@ Format each card EXACTLY like this (no deviations):
 One crisp paragraph. Max 60 words. Who, what, why it matters. No fluff.
 
 
+Remove content below Quick links
+
 
 Newsletter:
 {body}"""
