@@ -8,7 +8,7 @@ from app.logger import get_logger
 logger = get_logger(__name__)
 
 
-def fetch_tldr_emails(max_results: int = 3) -> list[dict]:
+def fetch_tldr_emails(max_results: int = 10) -> list[dict]:
     """
     Fetches TLDR emails from the last 24 hours via IMAP.
     Marks each fetched email as read.
