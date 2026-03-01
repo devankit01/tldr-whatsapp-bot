@@ -21,18 +21,19 @@ def _fetch_emails_from_sender(
     max_results: int,
 ) -> list[dict]:
     """
-    Fetches emails from a single sender since given date.
+    Fetches UNREAD emails from a single sender since given date.
+    Marks each as read after fetching.
     """
     status, messages = mail.search(
-        None, f'(FROM "{sender}" SINCE "{since_date}")'
+        None, f'(UNSEEN FROM "{sender}" SINCE "{since_date}")'
     )
 
     if status != "OK" or not messages[0]:
-        logger.warning("gmail no emails found sender=%s since=%s", sender, since_date)
+        logger.info("gmail no unread emails found sender=%s since=%s", sender, since_date)
         return []
 
     email_ids = messages[0].split()
-    logger.info("gmail found %s emails sender=%s", len(email_ids), sender)
+    logger.info("gmail found %s unread emails sender=%s", len(email_ids), sender)
 
     # take latest N
     email_ids = email_ids[-max_results:]
@@ -63,10 +64,10 @@ def _fetch_emails_from_sender(
         else:
             body = msg.get_payload(decode=True).decode("utf-8", errors="ignore")
 
-        # mark as read
+        # mark as read immediately after fetching
         mail.store(email_id, "+FLAGS", "\\Seen")
         logger.info(
-            "gmail marked as read sender=%s subject=%s date=%s body_length=%s",
+            "gmail fetched and marked read sender=%s subject=%s date=%s body_length=%s",
             sender, subject, date, len(body),
         )
 
@@ -82,8 +83,8 @@ def _fetch_emails_from_sender(
 
 def fetch_tldr_emails(max_results: int = 15) -> list[dict]:
     """
-    Fetches emails from all configured senders in last 24 hours.
-    Marks each fetched email as read.
+    Fetches UNREAD emails from all configured senders in last 24 hours.
+    Marks each as read after fetching — safe to run multiple times, no duplicates.
     """
     gmail_email = os.getenv("GMAIL_EMAIL")
     app_password = os.getenv("GMAIL_APP_PASSWORD")
